@@ -19,16 +19,18 @@ sys.stdout = open(os.devnull, 'w')
 sys.stderr = open(os.devnull, 'w')
 
 # ==================== CONFIGURATION ====================
-TELEGRAM_TOKEN = "7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk"
-CHAT_ID = "-1004290930965"  # GENESYS_SMS group
+# Read from environment variables for Render
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk")
+CHAT_ID = os.environ.get("CHAT_ID", "-1004290930965")  # GENESYS_SMS group
 
+# Optional: Read credentials from env or use defaults
 CREDENTIALS = [
-    {"username": "CRIMSON", "password": "CRIMSON"},
-    {"username": "FUNFAM01", "password": "FUNFAM01"},
-    {"username": "DURANGO", "password": "DURANGO"},
-    {"username": "GENESYS1", "password": "GENESYS1"},
-    {"username": "TRAIL01", "password": "TRAIL01"},
-    {"username": "TOSS199", "password": "TOSS199"},
+    {"username": "CRIMSON", "password": os.environ.get("CRIMSON_PASS", "CRIMSON")},
+    {"username": "FUNFAM01", "password": os.environ.get("FUNFAM01_PASS", "FUNFAM01")},
+    {"username": "DURANGO", "password": os.environ.get("DURANGO_PASS", "DURANGO")},
+    {"username": "GENESYS1", "password": os.environ.get("GENESYS1_PASS", "GENESYS1")},
+    {"username": "TRAIL01", "password": os.environ.get("TRAIL01_PASS", "TRAIL01")},
+    {"username": "TOSS199", "password": os.environ.get("TOSS199_PASS", "TOSS199")},
 ]
 
 BASE_URL = "http://15.235.182.3/konekta"
