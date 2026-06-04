@@ -86,13 +86,15 @@ def send_telegram_with_button(account, msg):
         country_name, flag = extract_country_and_flag(msg['range'])
         masked_num = mask_number(msg['number'])
         
-        formatted = f"""<blockquote>⏰ <b>Time:</b> {msg['time']}</blockquote>
+        # Format with account and quoted
+        formatted = f'''"<blockquote>⏰ <b>Time:</b> {msg['time']}</blockquote>
 <blockquote>🌍 <b>Country:</b> {country_name} {flag}</blockquote>
 <blockquote>📌 <b>Sender:</b> {msg['cli']}</blockquote>
 <blockquote>☎️ <b>Number:</b> {masked_num}</blockquote>
 <blockquote>🌐 <b>Range:</b> {msg['range']}</blockquote>
+<blockquote>👤 <b>Account:</b> {account}</blockquote>
 
-Panel - Konekta"""
+Panel - Konekta"'''
         
         keyboard = {"inline_keyboard": [[{"text": "👨‍💻 Developer", "url": "https://t.me/prince_ACTIVE1"}]]}
         send_telegram_message(formatted, keyboard)
@@ -245,7 +247,7 @@ def start_monitoring():
 if __name__ == "__main__":
     # Silent startup - send one notification
     try:
-        send_telegram_message("<b>🤖 SMS Monitor Started</b>\n\nMonitoring active...")
+        send_telegram_message('"<b>🤖 SMS Monitor Started</b>\n\nMonitoring active..."')
     except:
         pass
     
