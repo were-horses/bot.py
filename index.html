@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Telegram Bot - OTP Notifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            font-weight: 300;
+            font-size: 28px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #8892a8;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .config-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .config-section label {
+            display: block;
+            font-size: 12px;
+            color: #8892a8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .config-section input, .config-section select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-family: monospace;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .config-section input:focus, .config-section select:focus {
+            border-color: #4ade80;
+        }
+        .config-section input::placeholder {
+            color: #5a6478;
+        }
+        .config-section .row {
+            margin-bottom: 16px;
+        }
+        .config-section .row:last-child {
+            margin-bottom: 0;
+        }
+        .config-section select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #4ade80;
+            color: #0b0e1a;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+        .btn-secondary {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .status.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .status.info {
+            display: block;
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .status.warning {
+            display: block;
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .preview-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            font-family: monospace;
+            font-size: 13px;
+            color: #c8d0e0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .preview-box blockquote {
+            border-left: 3px solid #4ade80;
+            padding-left: 12px;
+            margin: 6px 0;
+            color: #e8e4dc;
+        }
+        .preview-box .keyboard {
+            color: #8892a8;
+            font-size: 11px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+        }
+        .toggle-label input[type="checkbox"] {
+            width: 44px;
+            height: 24px;
+            appearance: none;
+            background: #2a2a4a;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .toggle-label input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #5a6478;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .toggle-label input[type="checkbox"]:checked {
+            background: #4ade80;
+        }
+        .toggle-label input[type="checkbox"]:checked::after {
+            left: 22px;
+            background: white;
+        }
+        .toggle-label span {
+            font-size: 14px;
+            color: #c8d0e0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .badge-on { background: rgba(16, 185, 129, 0.2); color: #4ade80; }
+        .badge-off { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .badge-active { background: rgba(74, 222, 128, 0.2); color: #4ade80; }
+        .log {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            color: #8892a8;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: none;
+        }
+        .log.show { display: block; }
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .log-entry .time { color: #5a6478; }
+        .log-entry .msg { color: #c8d0e0; }
+        .log-entry .success { color: #4ade80; }
+        .log-entry .error { color: #f87171; }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #5a6478;
+            font-size: 12px;
+        }
+        .presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .preset-btn {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            color: #8892a8;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            background: rgba(74, 222, 128, 0.15);
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+        .row-flex {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .row-flex .col {
+            flex: 1;
+            min-width: 150px;
+        }
+        .otp-display {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #8892a8;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .otp-display .otp-entry {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .otp-display .otp-entry .number {
+            color: #4ade80;
+            font-weight: 600;
+            font-family: monospace;
+        }
+        .otp-display .otp-entry .message {
+            color: #c8d0e0;
+        }
+        .otp-display .otp-entry .status-sent {
+            color: #4ade80;
+            font-size: 10px;
+        }
+        .otp-display .otp-entry .status-pending {
+            color: #fbbf24;
+            font-size: 10px;
+        }
+        .otp-display .otp-entry .time {
+            color: #5a6478;
+            font-size: 10px;
+        }
+        .badge-otp {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+        .auto-poll-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #8892a8;
+        }
+        .auto-poll-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .auto-poll-status .dot.online {
+            background: #4ade80;
+            animation: pulse 1.5s infinite;
+        }
+        .auto-poll-status .dot.offline {
+            background: #ef4444;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📨 Telegram Bot</h1>
+        <p class="subtitle">Auto-send OTP notifications to Telegram</p>
+
+        <div class="config-section">
+            <div class="row">
+                <label>Bot Token</label>
+                <input type="text" id="botToken" placeholder="7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk" value="">
+            </div>
+            <div class="row">
+                <label>Chat ID</label>
+                <input type="text" id="chatId" placeholder="-1004290930965" value="">
+            </div>
+            <div class="row">
+                <label>OTP API Token</label>
+                <input type="text" id="otpToken" placeholder="MHBXC3CY7VB" value="MHBXC3CY7VB">
+            </div>
+            <div class="presets">
+                <button class="preset-btn" onclick="clearFields()">Clear</button>
+                <button class="preset-btn" onclick="loadDefault()">Load Default</button>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <div class="row">
+                <label>Developer URL</label>
+                <input type="text" id="developerUrl" placeholder="https://t.me/prince_ACTIVE1" value="https://t.me/prince_ACTIVE1">
+            </div>
+            <div class="row" style="margin-top:12px;">
+                <label>Polling Interval (seconds)</label>
+                <input type="number" id="pollInterval" value="10" min="5" max="60">
+            </div>
+        </div>
+
+        <button class="btn" onclick="startPolling()">▶ Start Auto-Polling</button>
+        <button class="btn btn-secondary" onclick="stopPolling()">⏹ Stop Polling</button>
+        <button class="btn" onclick="fetchAndSendNow()">📤 Fetch & Send Now</button>
+        <button class="btn btn-danger" onclick="clearLog()">🗑 Clear Log</button>
+
+        <div id="status" class="status"></div>
+
+        <div class="auto-poll-status" id="pollStatus">
+            <span class="dot offline" id="statusDot"></span>
+            <span id="statusText">Not polling</span>
+            <span id="otpCount" style="margin-left:auto;">OTPs: 0</span>
+        </div>
+
+        <label class="toggle-label">
+            <input type="checkbox" id="notificationsToggle" checked>
+            <span>Enable Notifications <span class="badge badge-on" id="statusBadge">ON</span></span>
+        </label>
+
+        <div style="margin-top:16px;">
+            <p style="font-size:12px;color:#8892a8;margin-bottom:8px;">📋 Preview (Auto-detected from API):</p>
+            <div class="preview-box" id="previewBox">
+                <blockquote>⏰ <b>Time:</b> 2026-07-05 14:30:25</blockquote>
+                <blockquote>🌍 <b>Country:</b> Auto-detected from number</blockquote>
+                <blockquote>📌 <b>Sender:</b> Auto-detected from message</blockquote>
+                <blockquote>☎️ <b>Number:</b> From API</blockquote>
+                <blockquote>🌐 <b>Range:</b> 26134</blockquote>
+                <div style="margin-top:8px;color:#4ade80;">Panel - GENESYS SMS</div>
+                <div class="keyboard">[ 👨‍💻 Developer ]</div>
+            </div>
+        </div>
+
+        <div style="margin-top:16px;">
+            <p style="font-size:12px;color:#8892a8;margin-bottom:8px;">📡 Recent OTPs:</p>
+            <div class="otp-display" id="otpDisplay">
+                <div style="text-align:center;padding:20px;color:#5a6478;">No OTPs fetched yet</div>
+            </div>
+        </div>
+
+        <div class="log" id="logContainer">
+            <div id="logEntries"></div>
+        </div>
+
+        <div class="footer">
+            <span id="botStatus">⚪ Not configured</span>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        let notificationsEnabled = true;
+        let botToken = '';
+        let chatId = '';
+        let otpToken = '';
+        let pollingInterval = null;
+        let isPolling = false;
+        let processedOtps = new Set();
+        let otpCount = 0;
+
+        const OTP_API_URL = 'https://api.2oo9.cloud/MXS47FLFX0U/tnevs/@public/api/success-otp';
+
+        // Country codes mapping
+        const COUNTRY_CODES = {
+            '224': { name: 'Guinea', flag: '🇬🇳' },
+            '221': { name: 'Senegal', flag: '🇸🇳' },
+            '223': { name: 'Mali', flag: '🇲🇱' },
+            '225': { name: 'Ivory Coast', flag: '🇨🇮' },
+            '226': { name: 'Burkina Faso', flag: '🇧🇫' },
+            '227': { name: 'Niger', flag: '🇳🇪' },
+            '228': { name: 'Togo', flag: '🇹🇬' },
+            '229': { name: 'Benin', flag: '🇧🇯' },
+            '230': { name: 'Mauritius', flag: '🇲🇺' },
+            '231': { name: 'Liberia', flag: '🇱🇷' },
+            '232': { name: 'Sierra Leone', flag: '🇸🇱' },
+            '233': { name: 'Ghana', flag: '🇬🇭' },
+            '234': { name: 'Nigeria', flag: '🇳🇬' },
+            '235': { name: 'Chad', flag: '🇹🇩' },
+            '236': { name: 'CAR', flag: '🇨🇫' },
+            '237': { name: 'Cameroon', flag: '🇨🇲' },
+            '238': { name: 'Cape Verde', flag: '🇨🇻' },
+            '239': { name: 'Sao Tome', flag: '🇸🇹' },
+            '240': { name: 'Equatorial Guinea', flag: '🇬🇶' },
+            '241': { name: 'Gabon', flag: '🇬🇦' },
+            '242': { name: 'Congo', flag: '🇨🇬' },
+            '243': { name: 'DRC', flag: '🇨🇩' },
+            '244': { name: 'Angola', flag: '🇦🇴' },
+            '245': { name: 'Guinea-Bissau', flag: '🇬🇼' },
+            '246': { name: 'Diego Garcia', flag: '🇮🇴' },
+            '247': { name: 'Ascension', flag: '🇦🇨' },
+            '248': { name: 'Seychelles', flag: '🇸🇨' },
+            '249': { name: 'Sudan', flag: '🇸🇩' },
+            '250': { name: 'Rwanda', flag: '🇷🇼' },
+            '251': { name: 'Ethiopia', flag: '🇪🇹' },
+            '252': { name: 'Somalia', flag: '🇸🇴' },
+            '253': { name: 'Djibouti', flag: '🇩🇯' },
+            '254': { name: 'Kenya', flag: '🇰🇪' },
+            '255': { name: 'Tanzania', flag: '🇹🇿' },
+            '256': { name: 'Uganda', flag: '🇺🇬' },
+            '257': { name: 'Burundi', flag: '🇧🇮' },
+            '258': { name: 'Mozambique', flag: '🇲🇿' },
+            '260': { name: 'Zambia', flag: '🇿🇲' },
+            '261': { name: 'Madagascar', flag: '🇲🇬' },
+            '262': { name: 'Reunion', flag: '🇷🇪' },
+            '263': { name: 'Zimbabwe', flag: '🇿🇼' },
+            '264': { name: 'Namibia', flag: '🇳🇦' },
+            '265': { name: 'Malawi', flag: '🇲🇼' },
+            '266': { name: 'Lesotho', flag: '🇱🇸' },
+            '267': { name: 'Botswana', flag: '🇧🇼' },
+            '268': { name: 'Swaziland', flag: '🇸🇿' },
+            '269': { name: 'Comoros', flag: '🇰🇲' },
+            '27': { name: 'South Africa', flag: '🇿🇦' },
+            '30': { name: 'Greece', flag: '🇬🇷' },
+            '31': { name: 'Netherlands', flag: '🇳🇱' },
+            '32': { name: 'Belgium', flag: '🇧🇪' },
+            '33': { name: 'France', flag: '🇫🇷' },
+            '34': { name: 'Spain', flag: '🇪🇸' },
+            '36': { name: 'Hungary', flag: '🇭🇺' },
+            '39': { name: 'Italy', flag: '🇮🇹' },
+            '40': { name: 'Romania', flag: '🇷🇴' },
+            '41': { name: 'Switzerland', flag: '🇨🇭' },
+            '43': { name: 'Austria', flag: '🇦🇹' },
+            '44': { name: 'UK', flag: '🇬🇧' },
+            '45': { name: 'Denmark', flag: '🇩🇰' },
+            '46': { name: 'Sweden', flag: '🇸🇪' },
+            '47': { name: 'Norway', flag: '🇳🇴' },
+            '48': { name: 'Poland', flag: '🇵🇱' },
+            '49': { name: 'Germany', flag: '🇩🇪' },
+            '51': { name: 'Peru', flag: '🇵🇪' },
+            '52': { name: 'Mexico', flag: '🇲🇽' },
+            '53': { name: 'Cuba', flag: '🇨🇺' },
+            '54': { name: 'Argentina', flag: '🇦🇷' },
+            '55': { name: 'Brazil', flag: '🇧🇷' },
+            '56': { name: 'Chile', flag: '🇨🇱' },
+            '57': { name: 'Colombia', flag: '🇨🇴' },
+            '58': { name: 'Venezuela', flag: '🇻🇪' },
+            '60': { name: 'Malaysia', flag: '🇲🇾' },
+            '61': { name: 'Australia', flag: '🇦🇺' },
+            '62': { name: 'Indonesia', flag: '🇮🇩' },
+            '63': { name: 'Philippines', flag: '🇵🇭' },
+            '64': { name: 'New Zealand', flag: '🇳🇿' },
+            '65': { name: 'Singapore', flag: '🇸🇬' },
+            '66': { name: 'Thailand', flag: '🇹🇭' },
+            '81': { name: 'Japan', flag: '🇯🇵' },
+            '82': { name: 'South Korea', flag: '🇰🇷' },
+            '84': { name: 'Vietnam', flag: '🇻🇳' },
+            '86': { name: 'China', flag: '🇨🇳' },
+            '90': { name: 'Turkey', flag: '🇹🇷' },
+            '91': { name: 'India', flag: '🇮🇳' },
+            '92': { name: 'Pakistan', flag: '🇵🇰' },
+            '93': { name: 'Afghanistan', flag: '🇦🇫' },
+            '94': { name: 'Sri Lanka', flag: '🇱🇰' },
+            '95': { name: 'Myanmar', flag: '🇲🇲' },
+            '98': { name: 'Iran', flag: '🇮🇷' },
+            '211': { name: 'South Sudan', flag: '🇸🇸' },
+            '212': { name: 'Morocco', flag: '🇲🇦' },
+            '213': { name: 'Algeria', flag: '🇩🇿' },
+            '216': { name: 'Tunisia', flag: '🇹🇳' },
+            '218': { name: 'Libya', flag: '🇱🇾' },
+            '220': { name: 'Gambia', flag: '🇬🇲' },
+            '221': { name: 'Senegal', flag: '🇸🇳' },
+            '222': { name: 'Mauritania', flag: '🇲🇷' },
+            '223': { name: 'Mali', flag: '🇲🇱' },
+            '224': { name: 'Guinea', flag: '🇬🇳' },
+            '225': { name: 'Ivory Coast', flag: '🇨🇮' },
+            '226': { name: 'Burkina Faso', flag: '🇧🇫' },
+            '227': { name: 'Niger', flag: '🇳🇪' },
+            '228': { name: 'Togo', flag: '🇹🇬' },
+            '229': { name: 'Benin', flag: '🇧🇯' },
+            '230': { name: 'Mauritius', flag: '🇲🇺' },
+            '231': { name: 'Liberia', flag: '🇱🇷' },
+            '232': { name: 'Sierra Leone', flag: '🇸🇱' },
+            '233': { name: 'Ghana', flag: '🇬🇭' },
+            '234': { name: 'Nigeria', flag: '🇳🇬' },
+            '235': { name: 'Chad', flag: '🇹🇩' },
+            '236': { name: 'CAR', flag: '🇨🇫' },
+            '237': { name: 'Cameroon', flag: '🇨🇲' },
+            '238': { name: 'Cape Verde', flag: '🇨🇻' },
+            '239': { name: 'Sao Tome', flag: '🇸🇹' },
+            '240': { name: 'Equatorial Guinea', flag: '🇬🇶' },
+            '241': { name: 'Gabon', flag: '🇬🇦' },
+            '242': { name: 'Congo', flag: '🇨🇬' },
+            '243': { name: 'DRC', flag: '🇨🇩' },
+            '244': { name: 'Angola', flag: '🇦🇴' },
+            '245': { name: 'Guinea-Bissau', flag: '🇬🇼' },
+            '246': { name: 'Diego Garcia', flag: '🇮🇴' },
+            '247': { name: 'Ascension', flag: '🇦🇨' },
+            '248': { name: 'Seychelles', flag: '🇸🇨' },
+            '249': { name: 'Sudan', flag: '🇸🇩' },
+            '250': { name: 'Rwanda', flag: '🇷🇼' },
+            '251': { name: 'Ethiopia', flag: '🇪🇹' },
+            '252': { name: 'Somalia', flag: '🇸🇴' },
+            '253': { name: 'Djibouti', flag: '🇩🇯' },
+            '254': { name: 'Kenya', flag: '🇰🇪' },
+            '255': { name: 'Tanzania', flag: '🇹🇿' },
+            '256': { name: 'Uganda', flag: '🇺🇬' },
+            '257': { name: 'Burundi', flag: '🇧🇮' },
+            '258': { name: 'Mozambique', flag: '🇲🇿' },
+            '260': { name: 'Zambia', flag: '🇿🇲' },
+            '261': { name: 'Madagascar', flag: '🇲🇬' },
+            '262': { name: 'Reunion', flag: '🇷🇪' },
+            '263': { name: 'Zimbabwe', flag: '🇿🇼' },
+            '264': { name: 'Namibia', flag: '🇳🇦' },
+            '265': { name: 'Malawi', flag: '🇲🇼' },
+            '266': { name: 'Lesotho', flag: '🇱🇸' },
+            '267': { name: 'Botswana', flag: '🇧🇼' },
+            '268': { name: 'Swaziland', flag: '🇸🇿' },
+            '269': { name: 'Comoros', flag: '🇰🇲' },
+            '27': { name: 'South Africa', flag: '🇿🇦' }
+        };
+
+        function getCountryInfo(number) {
+            if (!number) return { name: 'Unknown', flag: '🌍' };
+            const clean = number.replace(/^\+/, '');
+            // Try to match country code (1-3 digits)
+            for (let len = 3; len >= 1; len--) {
+                const code = clean.substring(0, len);
+                if (COUNTRY_CODES[code]) {
+                    return COUNTRY_CODES[code];
+                }
+            }
+            return { name: 'Unknown', flag: '🌍' };
+        }
+
+        function extractSender(message) {
+            if (!message) return 'Unknown';
+            // Try to find sender from message
+            const patterns = [
+                /your\s+([A-Za-z0-9]+)\s+(?:code|verification|OTP)/i,
+                /from\s+([A-Za-z0-9]+)/i,
+                /for\s+([A-Za-z0-9]+)/i,
+                /([A-Za-z]+)\s+code/i,
+                /^([A-Za-z]+)\s+code/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match) {
+                    return match[1];
+                }
+            }
+            return 'Unknown';
+        }
+
+        // Load saved config
+        function loadConfig() {
+            const savedToken = localStorage.getItem('telegram_bot_token');
+            const savedChatId = localStorage.getItem('telegram_chat_id');
+            const savedOtpToken = localStorage.getItem('otp_token');
+            const savedDevUrl = localStorage.getItem('otp_dev_url');
+            const savedPollInterval = localStorage.getItem('otp_poll_interval');
+
+            if (savedToken) document.getElementById('botToken').value = savedToken;
+            if (savedChatId) document.getElementById('chatId').value = savedChatId;
+            if (savedOtpToken) document.getElementById('otpToken').value = savedOtpToken;
+            if (savedDevUrl) document.getElementById('developerUrl').value = savedDevUrl;
+            if (savedPollInterval) document.getElementById('pollInterval').value = savedPollInterval;
+
+            botToken = document.getElementById('botToken').value;
+            chatId = document.getElementById('chatId').value;
+            otpToken = document.getElementById('otpToken').value;
+            updateBotStatus();
+        }
+
+        function saveConfig() {
+            localStorage.setItem('telegram_bot_token', document.getElementById('botToken').value);
+            localStorage.setItem('telegram_chat_id', document.getElementById('chatId').value);
+            localStorage.setItem('otp_token', document.getElementById('otpToken').value);
+            localStorage.setItem('otp_dev_url', document.getElementById('developerUrl').value);
+            localStorage.setItem('otp_poll_interval', document.getElementById('pollInterval').value);
+            botToken = document.getElementById('botToken').value;
+            chatId = document.getElementById('chatId').value;
+            otpToken = document.getElementById('otpToken').value;
+            updateBotStatus();
+        }
+
+        function loadDefault() {
+            document.getElementById('botToken').value = '7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk';
+            document.getElementById('chatId').value = '-1004290930965';
+            document.getElementById('otpToken').value = 'MHBXC3CY7VB';
+            document.getElementById('developerUrl').value = 'https://t.me/prince_ACTIVE1';
+            saveConfig();
+            showStatus('info', 'Default settings loaded');
+        }
+
+        function clearFields() {
+            document.getElementById('botToken').value = '';
+            document.getElementById('chatId').value = '';
+            document.getElementById('otpToken').value = '';
+            saveConfig();
+            showStatus('info', 'Fields cleared');
+        }
+
+        // Toggle notifications
+        document.getElementById('notificationsToggle').addEventListener('change', function() {
+            notificationsEnabled = this.checked;
+            const badge = document.getElementById('statusBadge');
+            if (notificationsEnabled) {
+                badge.textContent = 'ON';
+                badge.className = 'badge badge-on';
+            } else {
+                badge.textContent = 'OFF';
+                badge.className = 'badge badge-off';
+            }
+            showStatus('info', `Notifications ${notificationsEnabled ? 'enabled' : 'disabled'}`);
+        });
+
+        // Build formatted message with auto-detected values
+        function buildFormattedMessage(otp) {
+            const time = new Date(otp.time).toLocaleString();
+            const number = otp.number || 'Unknown';
+            const countryInfo = getCountryInfo(number);
+            const sender = extractSender(otp.message);
+            const range = '26134';
+            const devUrl = document.getElementById('developerUrl').value || 'https://t.me/prince_ACTIVE1';
+
+            const formatted = `<blockquote>⏰ <b>Time:</b> ${time}</blockquote>
+            <blockquote>🌍 <b>Country:</b> ${countryInfo.name} ${countryInfo.flag}</blockquote>
+            <blockquote>📌 <b>Sender:</b> ${sender}</blockquote>
+            <blockquote>☎️ <b>Number:</b> ${number}</blockquote>
+            <blockquote>🌐 <b>Range:</b> ${range}</blockquote>
+
+Panel - GENESYS SMS`;
+
+            const keyboard = {
+                "inline_keyboard": [[
+                    {"text": "👨‍💻 Developer", "url": devUrl}
+                ]]
+            };
+
+            return { text: formatted, keyboard: keyboard };
+        }
+
+        // Fetch OTPs from API
+        async function fetchOtps() {
+            const token = document.getElementById('otpToken').value.trim();
+            if (!token) {
+                showStatus('warning', '⚠️ OTP API Token is required');
+                return null;
+            }
+
+            try {
+                const response = await fetch(OTP_API_URL, {
+                    headers: {
+                        'mauthapi': token,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.meta?.code !== 200) {
+                    throw new Error(data.message || 'API error');
+                }
+
+                return data.data?.otps || [];
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showStatus('error', `❌ Fetch error: ${error.message}`);
+                return null;
+            }
+        }
+
+        // Send message to Telegram with inline keyboard
+        async function sendTelegramMessage(text, keyboard = null) {
+            const token = document.getElementById('botToken').value.trim();
+            const chat = document.getElementById('chatId').value.trim();
+
+            if (!token || !chat) {
+                showStatus('error', '❌ Please enter Bot Token and Chat ID');
+                return { ok: false, error: 'Missing credentials' };
+            }
+
+            if (!notificationsEnabled) {
+                return { ok: false, error: 'Notifications disabled' };
+            }
+
+            try {
+                const payload = {
+                    chat_id: chat,
+                    text: text,
+                    parse_mode: 'HTML',
+                    disable_notification: false
+                };
+
+                if (keyboard) {
+                    payload.reply_markup = JSON.stringify(keyboard);
+                }
+
+                const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    return data;
+                } else {
+                    throw new Error(data.description || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Telegram error:', error);
+                return { ok: false, error: error.message };
+            }
+        }
+
+        // Process and send OTP
+        async function processOtp(otp) {
+            const otpId = otp.otp_id;
+            
+            // Skip if already processed
+            if (processedOtps.has(otpId)) {
+                return false;
+            }
+
+            // Skip if no message content
+            if (!otp.message || otp.message.trim() === '') {
+                return false;
+            }
+
+            const { text, keyboard } = buildFormattedMessage(otp);
+            const result = await sendTelegramMessage(text, keyboard);
+
+            if (result.ok) {
+                processedOtps.add(otpId);
+                otpCount++;
+                updateOtpDisplay(otp, true);
+                addLog(`OTP sent: ${otp.number} - ${otp.message.substring(0, 30)}...`, 'success');
+                return true;
+            } else {
+                updateOtpDisplay(otp, false);
+                addLog(`Failed to send OTP: ${result.error}`, 'error');
+                return false;
+            }
+        }
+
+        // Main fetch and send function
+        async function fetchAndSendNow() {
+            saveConfig();
+            showStatus('info', '⏳ Fetching OTPs...');
+            addLog('Fetching OTPs from API...', 'info');
+
+            const otps = await fetchOtps();
+            
+            if (!otps) {
+                showStatus('error', '❌ Failed to fetch OTPs');
+                return;
+            }
+
+            if (otps.length === 0) {
+                showStatus('info', '📭 No OTPs found');
+                addLog('No OTPs found', 'info');
+                document.getElementById('otpDisplay').innerHTML = '<div style="text-align:center;padding:20px;color:#5a6478;">No OTPs available</div>';
+                return;
+            }
+
+            showStatus('info', `📥 Found ${otps.length} OTPs, processing...`);
+            addLog(`Found ${otps.length} OTPs`, 'info');
+
+            let sent = 0;
+            const latestOtps = otps.slice(0, 20);
+
+            for (const otp of latestOtps) {
+                const result = await processOtp(otp);
+                if (result) sent++;
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+
+            const totalOtps = document.querySelectorAll('.otp-entry').length;
+            showStatus('success', `✅ Processed ${otps.length} OTPs, sent ${sent} new notifications`);
+            addLog(`Completed: sent ${sent} new OTPs`, 'success');
+            document.getElementById('otpCount').textContent = `OTPs: ${totalOtps}`;
+        }
+
+        // Update OTP display
+        function updateOtpDisplay(otp, sent) {
+            const display = document.getElementById('otpDisplay');
+            
+            if (display.querySelector('div[style*="text-align:center"]')) {
+                display.innerHTML = '';
+            }
+
+            const countryInfo = getCountryInfo(otp.number);
+            const sender = extractSender(otp.message);
+
+            const entry = document.createElement('div');
+            entry.className = 'otp-entry';
+            entry.innerHTML = `
+                <span class="number">${otp.number}</span>
+                <span class="message">${otp.message.substring(0, 35)}${otp.message.length > 35 ? '...' : ''}</span>
+                <span style="font-size:9px;color:#8892a8;">${countryInfo.flag} ${sender}</span>
+                <span class="time">${new Date(otp.time).toLocaleTimeString()}</span>
+                <span class="${sent ? 'status-sent' : 'status-pending'}">${sent ? '✅ Sent' : '⏳ Pending'}</span>
+            `;
+            display.prepend(entry);
+
+            while (display.children.length > 50) {
+                display.removeChild(display.lastChild);
+            }
+        }
+
+        // Start polling
+        function startPolling() {
+            if (isPolling) {
+                showStatus('warning', '⏳ Already polling');
+                return;
+            }
+
+            saveConfig();
+            const interval = parseInt(document.getElementById('pollInterval').value) || 10;
+            
+            showStatus('info', `⏳ Starting polling every ${interval} seconds...`);
+            addLog(`Starting polling every ${interval} seconds`, 'info');
+
+            isPolling = true;
+            document.getElementById('statusDot').className = 'dot online';
+            document.getElementById('statusText').textContent = `Polling every ${interval}s`;
+
+            fetchAndSendNow();
+
+            pollingInterval = setInterval(fetchAndSendNow, interval * 1000);
+        }
+
+        // Stop polling
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+            isPolling = false;
+            document.getElementById('statusDot').className = 'dot offline';
+            document.getElementById('statusText').textContent = 'Not polling';
+            showStatus('info', '⏹ Polling stopped');
+            addLog('Polling stopped', 'info');
+        }
+
+        // Status display
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 8000);
+        }
+
+        // Bot status
+        function updateBotStatus(state) {
+            const statusEl = document.getElementById('botStatus');
+            const token = document.getElementById('botToken').value.trim();
+            const chat = document.getElementById('chatId').value.trim();
+            
+            if (state === 'online') {
+                statusEl.innerHTML = '🟢 Connected to Telegram';
+            } else if (state === 'offline') {
+                statusEl.innerHTML = '🔴 Connection failed';
+            } else if (token && chat) {
+                statusEl.innerHTML = '🟡 Bot configured, ready to send';
+            } else {
+                statusEl.innerHTML = '⚪ Not configured';
+            }
+        }
+
+        // Log functions
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const entries = document.getElementById('logEntries');
+            const time = new Date().toLocaleTimeString();
+            
+            container.classList.add('show');
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="time">[${time}]</span> <span class="${type}">${message}</span>`;
+            entries.appendChild(entry);
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logEntries').innerHTML = '';
+            document.getElementById('logContainer').classList.remove('show');
+            showStatus('info', 'Log cleared');
+        }
+
+        // Auto-save on input change
+        document.getElementById('botToken').addEventListener('change', saveConfig);
+        document.getElementById('chatId').addEventListener('change', saveConfig);
+        document.getElementById('otpToken').addEventListener('change', saveConfig);
+
+        // Initialize
+        loadConfig();
+
+        // Check bot connection on load
+        setTimeout(async () => {
+            if (botToken && chatId) {
+                const result = await sendTelegramMessage('🔄 <b>Bot Connected</b>\n\nOTP Notifier is ready.');
+                if (result.ok) {
+                    updateBotStatus('online');
+                }
+            }
+        }, 2000);
+
+        console.log('📨 Telegram OTP Notifier Ready');
+        console.log('Bot Token:', botToken ? '✅ Set' : '❌ Not set');
+        console.log('Chat ID:', chatId ? '✅ Set' : '❌ Not set');
+        console.log('OTP Token:', otpToken ? '✅ Set' : '❌ Not set');
+    </script>
+</body>
+</html>
